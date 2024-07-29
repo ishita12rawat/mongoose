@@ -24,10 +24,10 @@
 //  })
 const express = require("express");
 
-const PORT = 8080;
+const PORT = 8060;
 const app = express();
 
-const blogs = [];
+//const blogs = [];
 //middleware=builtin middleware
 app.use(express.json());
 
@@ -38,41 +38,80 @@ app.get("/health", (req, res) => {
 
 // Create
 
-app.post("/blog", (req, res) => {
-  //   console.log(req.body);
-  //destructing,extract the body prooerty from the req
-  const { body } = req;
-// Extracts 'author' and 'content' from 'body
-  const { author, content } = body;
+// app.post("/blog", (req, res) => {
+//   //   console.log(req.body);
+//   //destructing,extract the body prooerty from the req
+//   const { body } = req;
+// // Extracts 'author' and 'content' from 'body
+//   const { author, content } = body;
 
-  if (author && content) {
-    blogs.push({ author, content });
-    res.send("OK");
-    return;
-  }
-  res.status(400).send("!OK");
-});
+//   if (author && content) {
+//     blogs.push({ author, content });
+//     res.status(201).send("OK");
+//     return;
+//   }
+//   res.status(400).send("!OK");
+// });
 
 // Read all blogs
 
-app.get("/blog", (req, res) => {
-  res.status(200).json(blogs).send();
-});
+// app.get("/blog", (req, res) => {
+//   res.status(200).json(blogs).send();
+// });
 
-// Read blog
+// // Read blog
 
-app.get("/blog/:blogId", (req, res) => {
-  let { blogId } = req.params;
-  console.log(blogId);
 
-  if (blogId > 0 && blogId <= blogs.length) {
-    blogId -= 1;
-    const blogToReturn = blogs[blogId];
-    return res.status(200).json(blogToReturn).send();
-  }
-  //   res.json(blogs).send();
-  res.status(404).send();
-});
+
+// app.get("/blog/:blogId", (req, res) => {
+//   let { blogId } = req.params;
+//   console.log(blogId);
+
+//   if (blogId > 0 && blogId <= blogs.length) {
+//     blogId -= 1;
+//     const blogToReturn = blogs[blogId];
+//     return res.status(200).json(blogToReturn).send();
+//   }
+//   //   res.json(blogs).send();
+//   res.status(404).send();
+// });
+
+// // app.put('/blog/:blogId',(req,res)=>{
+// //   let {body}=req;
+//   let { author, content } = body;
+//   let { blogId } = req.params;
+//   if (blogId > 0 && blogId <= blogs.length && author &&content) {
+//     blogId -= 1;
+//     blogs[blogId] = {author, content};
+//     return res.json(blogs[blogId]).status(200).send();
+//   }
+// })
+// app.patch("/blog/:blogId",(req,res)=>{
+//   const {author,content} = req.body;
+//   let {blogId} = req.params;
+//   if (blogId > 0 && blogId <= blogs.length && (author||content)) {
+//     blogId -= 1;
+//     blogs[blogId]={...blogs[blogId],author,content}
+//     // if(author)blogs[blogId].author = author;
+//     // if(content)blogs[blogId].content = content;
+// return res.status(200).send();
+//     // blogs[blogId] = {author,content};
+//   }
+//     return res.status(404).send();
+//   })
+//   app.delete("/blog/:blogId",(req,res)=>{
+//     let{blogId} = req.params;
+   
+//      if (blogId > 0 && blogId <= blogs.length) {
+//        blogId -= 1;
+       
+//        blogs.splice(blogId,1);
+      
+   
+//        return res.status(200).send();
+//      }
+//      return res.status(404).send();
+//    })
 
 app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
