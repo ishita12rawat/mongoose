@@ -1,6 +1,4 @@
-
-
-const {MONGO_URI} =require('../evn')
+const {MONGO_URI} =require('../env')
 const {MongoClient}=require('mongodb')
 const {BLOG_DB,BLOGS_COL} =require('../contants')
 let blogs =[];
