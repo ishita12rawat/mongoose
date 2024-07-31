@@ -1,55 +1,34 @@
+const {MongoClient, ObjectId} =require('mongodb')
 const {MONGO_URI} =require('../env')
-const {MongoClient}=require('mongodb')
+
 const {BLOG_DB,BLOGS_COL} =require('../contants')
 let blogs =[];
-const Getblog =(req, res) =>
+const Getblog =async(req, res) =>
+{
 
+  //  res.status(200).send(blogs);
 
-   {res.status(200).send(blogs);};
+  const client = new MongoClient(MONGO_URI);
 
+  try {
+    const blogDb = client.db(BLOG_DB);
+    const blogs = blogDb.collection(BLOGS_COL); 
 
+    const cursor = blogs.find({});
+    const result = await cursor.toArray();
 
+    res.status(200).json(result).send();
+  } catch (err) {
+    console.error(err);
 
+    res.status(500).send();
+  } finally {
+    await client.close();
+  }
 
+   }
 
-// const PostBlog= async(req, res) => {
-//     //console.log(req.body);
-//     const { body } = req;
-//     // Extracts 'author' and 'content' from 'body
-//       const { author, content } = body;
-//       // const client=new MongoClient(MONGO_URI)
-    
-//       // if (author && content) {
-//       //   blogs.push({ author, content });
-//       //   res.send("OK");
-//       //   return;
-//       // }
-//       // res.status(400).send("!OK");
-    
-//       if(!( author && content )){
-//         return res.status(400).send();
-//       }
-//       const client = new MongoClient(MONGO_URI);
-
-
-//       try{
-// const blogDb=client.db(BLOG_DB);
-// const blogs =blogDb.collection(BLOGS_COL);
-// const result =await blogs.insertOne({author,content})
-// console.log(`inserted ${{author,content}} into blogs.with _id ${resultinsertedId}`);
-// result.status(200).json({_id:result.insertedId}).send();
-//       }
-//       catch(err){
-//         console.log(err)
-//         res.status(500).send()
-//       }
-//      finally{
-//       await client.close();
-//      }
-    
-
-//  }
-
+   
 const PostBlog = async (req, res) => {
   //   console.log(req.body);
   const { body } = req;
@@ -59,9 +38,10 @@ const PostBlog = async (req, res) => {
     return res.status(400).send();
   }
 
-  const client = new MongoClient(MONGO_URI);
+  const client=new MongoClient(MONGO_URI);
 
   try {
+    
     const blogdb = client.db(BLOG_DB);
     const blogs = blogdb.collection(BLOGS_COL);
 
@@ -79,58 +59,120 @@ const PostBlog = async (req, res) => {
   }
 };
 
-
-    const GetBlogbyId= (req, res) => {
+//getblog by id
+  const GetBlogbyId= async(req, res) => {
         let { blogId } = req.params;
   console.log(blogId);
 
-  if (blogId > 0 && blogId <= blogs.length) {
-    blogId -= 1;
-    const blogToReturn = blogs[blogId];
-    return res.status(200).json(blogToReturn).send();
+  const client = new MongoClient(MONGO_URI);
+
+  try {
+    blogId = new ObjectId(blogId);
+    const blogDb = client.db(BLOG_DB);
+    const blogs = blogDb.collection(BLOGS_COL);
+
+    const result = await blogs.findOne({ _id: blogId });
+
+    res.status(200).json(result).send();
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).send();
+  } finally {
+    await client.close();
   }
-  //   res.json(blogs).send();
-  res.status(404).send();
+
 
     }
 
 
-    const PutbyId= (req, res) => {
+    const PutbyId=async (req, res) => {
         let { author, content } = req.body;
   let { blogId } = req.params;
-  if (blogId > 0 && blogId <= blogs.length && author &&content) {
-    blogId -= 1;
-    blogs[blogId] = {author, content};
-    return res.status(200).send();
+  
+  if (!(author && content)) {
+    return res.status(400).send();
   }
-    };
-const PatchbyId= (req, res) => {
+
+  const client = new MongoClient(MONGO_URI);
+
+  try {
+    blogId = new ObjectId(blogId);
+    const blogDb = client.db(BLOG_DB);
+    const blogs = blogDb.collection(BLOGS_COL);
+
+    const result = await blogs.findOneAndUpdate(
+      { _id: blogId },
+      { $set: { author, content } },
+      { returnDocument: "after" }
+    );
+
+    res.status(200).json(result).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send();
+  } finally {
+    await client.close();
+  }
+
+  }
+    
+const PatchbyId=async (req, res) => {
     const {author,content} = req.body;
     let {blogId} = req.params;
-    if (blogId > 0 && blogId <= blogs.length && (author||content)) {
-      blogId -= 1;
-      // if(author)blogs[blogId].author = author;
-      // if(content)blogs[blogId].content = content;
-      blogs[blogId]={...blogs[blogId],author,content}
-  return res.status(200).send();
-      // blogs[blogId] = {author,content};
+    if (!(author || content)) {
+      return res.status(400).send();
     }
-      return res.status(404).send();
-    }
-
-
-const DeletebtID= (req, res) => {
-    let{blogId} = req.params;
-   
-    if (blogId > 0 && blogId <= blogs.length) {
-      blogId -= 1;
-      
-      blogs.splice(blogId,1);
-      // blogs[blogId] = {author,content};
   
-      return res.status(200).send();
+    const updateDoc = {};
+    if (author) updateDoc.author = author;
+    if (content) updateDoc.content = content;
+  
+    const client = new MongoClient(MONGO_URI);
+  
+    try {
+      blogId = new ObjectId(blogId);
+      const blogDb = client.db(BLOG_DB);
+      const blogs = blogDb.collection(BLOGS_COL);
+  
+      const result = await blogs.findOneAndUpdate(
+        { _id: blogId },
+        { $set: updateDoc },
+        { returnDocument: "after" }
+      );
+  
+      res.status(200).json(result).send();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send();
+    } finally {
+      await client.close();
     }
-    return res.status(404).send();
+  
+    }
+
+
+const DeletebtID= async(req, res) => {
+   
+    let { blogId } = req.params;
+  const client = new MongoClient(MONGO_URI);
+
+  try {
+    blogId = new ObjectId(blogId);
+    const blogDb = client.db(BLOG_DB);
+    const blogs = blogDb.collection(BLOGS_COL);
+
+    const result = await blogs.findOneAndDelete({ _id: blogId });
+
+    res.status(200).json(result).send();
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).send();
+  } finally {
+    await client.close();
+  }
+
 };
 
 
