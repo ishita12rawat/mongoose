@@ -1,4 +1,4 @@
-<%- include('../layout/main',{title: blog.title,body:''}) %>
+<%- include ('../layouts/main', {title: 'blog.title' , body: '' }) %>
 
 <h2>
     <%= blog.title %>
@@ -7,8 +7,9 @@
     <%= blog.body %>
 </p>
 <a href="/blog/<%= blog._id %>/edit">Edit</a>
-<form action="/blog/<%= blog._id %>? _method=DELETE" method="POST">
+<form action="/blog/<%= blog._id %>?_method=DELETE" method="POST">
 
     <button type="submit"> DELETE</button>
 
      </form>
+     
